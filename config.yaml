@@ -1,0 +1,11 @@
+server:
+  endpoint: 10.0.0.1:51820
+  port: 51820
+  interface:
+    name: wg0
+    address: 10.0.0.1
+    network: 10.0.0.1/24
+client:
+  config_path: /path/to/config
+secret:
+  key_path: /path/to/key
