@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/tanan/wg-config-generator/config"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -11,6 +13,16 @@ var rootCmd = &cobra.Command{
 	Use:   "wgconf",
 	Short: "Wireguard Config Generator",
 	Long:  `wgconf is a CLI to generate server and client configrations.`,
+}
+
+func init() {
+	rootCmd.PersistentFlags().StringP("configFile", "c", "config.yaml", "config file path")
+}
+
+func initConfig(cmd *cobra.Command) {
+	configFile, _ := cmd.Flags().GetString("configFile")
+	fmt.Println(configFile)
+	config.LoadConfig(configFile)
 }
 
 func Execute() {

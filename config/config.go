@@ -1,46 +1,50 @@
 package config
 
 import (
+	"log/slog"
 	"os"
+	"sync"
 
-	"gopkg.in/yaml.v3"
+	"github.com/spf13/viper"
 )
 
+var cfg Config
+
 type Config struct {
-	Server ServerConfig `yaml:"server"`
-	Client ClientConfig `yaml:"client"`
-	Secret SecretConfig `yaml:"secret"`
+	WorkDir string       `mapstructure:"work_dir"`
+	Server  ServerConfig `mapstructure:"server"`
 }
 
 type ServerConfig struct {
-	Endpoint           string             `yaml:"endpoint"`
-	Port               int                `yaml:"port"`
-	WireguardInterface WireguardInterface `yaml:"interface"`
+	Endpoint           string             `mapstructure:"endpoint"`
+	Port               int                `mapstructure:"port"`
+	WireguardInterface WireguardInterface `mapstructure:"interface"`
 }
 
 type WireguardInterface struct {
-	Name    string `yaml:"name"`
-	Address string `yaml:"address"`
-	Network string `yaml:"network"`
+	Name    string `mapstructure:"name"`
+	Address string `mapstructure:"address"`
+	Network string `mapstructure:"network"`
 }
 
-type ClientConfig struct {
-	Path string `yaml:"path"`
+func GetConfig() Config {
+	return cfg
 }
 
-type SecretConfig struct {
-	Path string `yaml:"path"`
-}
+func LoadConfig(configFile string) {
+	var once sync.Once
+	once.Do(func() {
+		viper.SetConfigFile(configFile)
+		viper.SetConfigType("yaml")
+		viper.AutomaticEnv()
+		if err := viper.ReadInConfig(); err != nil {
+			slog.Error("failed to read config file", slog.String("config", configFile), slog.String("error", err.Error()))
+			os.Exit(1)
+		}
 
-func LoadConfig(path string) (Config, error) {
-	var c Config
-	b, err := os.ReadFile(path)
-	if err != nil {
-		return Config{}, err
-	}
-	err = yaml.Unmarshal(b, &c)
-	if err != nil {
-		return Config{}, err
-	}
-	return c, nil
+		if err := viper.Unmarshal(&cfg); err != nil {
+			slog.Error("failed to unmarshal config", slog.String("config", configFile), slog.String("error", err.Error()))
+			os.Exit(1)
+		}
+	})
 }
