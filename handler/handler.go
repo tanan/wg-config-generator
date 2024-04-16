@@ -2,6 +2,7 @@ package handler
 
 import (
 	"io"
+	"log/slog"
 	"os/exec"
 )
 
@@ -32,5 +33,9 @@ func NewCommand() Command {
 func (h command) ExecCommand(cmd *exec.Cmd, stdin io.Reader) (string, error) {
 	cmd.Stdin = stdin
 	out, err := cmd.CombinedOutput()
+	if err != nil {
+		slog.Error("failed to exec command", slog.String("command", cmd.String()))
+		return "", err
+	}
 	return string(out), err
 }
