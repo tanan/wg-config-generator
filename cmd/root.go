@@ -8,7 +8,6 @@ import (
 	"github.com/tanan/wg-config-generator/config"
 )
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "wgconf",
 	Short: "Wireguard Config Generator",
