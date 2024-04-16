@@ -7,7 +7,7 @@ type ServerConfig struct {
 
 type ServerInterface struct {
 	Address          string
-	ListenPort       string
+	ListenPort       int
 	ServerPrivateKey string
 	MTU              string
 	PostUp           string
@@ -15,6 +15,7 @@ type ServerInterface struct {
 }
 
 type Client struct {
+	Name            string
 	ClientPublicKey string
 	PresharedKey    string
 	AllowedIPs      []string

@@ -1,6 +1,7 @@
 package domain
 
 type ClientConfig struct {
+	Name            string
 	ClientInterface ClientInterface
 	Peer            Server
 }

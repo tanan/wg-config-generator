@@ -4,12 +4,15 @@ import (
 	"io"
 	"log/slog"
 	"os/exec"
+
+	"github.com/tanan/wg-config-generator/config"
 )
 
 type Handler interface{}
 
 type handler struct {
 	Command
+	Cfg     config.Config
 	WorkDir string
 }
 

@@ -18,7 +18,15 @@ type Config struct {
 type ServerConfig struct {
 	Endpoint           string             `mapstructure:"endpoint"`
 	Port               int                `mapstructure:"port"`
+	DNS                string             `mapstructure:"dns"`
+	MTU                string             `mapstructure:"mtu"`
+	PrivateKeyFile     string             `mapstructure:"privatekeyfile"`
+	PublicKey          string             `mapstructure:"publickey"`
+	PresharedKey       string             `mapstructure:"presharedkey"`
 	WireguardInterface WireguardInterface `mapstructure:"interface"`
+	AllowedIPs         string             `mapstructure:"allowedips"`
+	PostUp             string             `mapstructure:"postup"`
+	PostDown           string             `mapstructure:"postdown"`
 }
 
 type WireguardInterface struct {
