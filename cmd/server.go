@@ -10,9 +10,9 @@ import (
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Create a server configuration",
-	Long: `Create a server configuration with given params. For example:
+	Long: `Create a server configuration with given parameters. For example:
 
-wgconf server create --config /path/to/config.yaml
+wgconf server create -c /path/to/config.yaml -o /path/to/output.conf
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("server called")
@@ -21,12 +21,4 @@ wgconf server create --config /path/to/config.yaml
 
 func init() {
 	rootCmd.AddCommand(serverCmd)
-
-	// TODO: 必要な引数
-	// config: path to config file
-
-	// contents of the config file
-	// client file foloder
-	// endpoint / port / interface / ip_address / pubkey / privkey(another file path) / presharedkey(another file path)
-
 }

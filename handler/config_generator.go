@@ -14,7 +14,7 @@ import (
 // read client files in work dir
 // create client list using client files
 func (h handler) GetClientList() ([]domain.Client, error) {
-	clientWorkDir := filepath.Join(h.WorkDir, "clients")
+	clientWorkDir := filepath.Join(h.Config.WorkDir, "clients")
 	files, err := os.ReadDir(clientWorkDir)
 	if err != nil {
 		return nil, err
@@ -45,31 +45,31 @@ func (h handler) CreateClientConfig(name string, address string) (domain.ClientC
 		ClientInterface: domain.ClientInterface{
 			Address:    address,
 			PrivateKey: privateKey,
-			DNS:        h.Cfg.Server.DNS,
-			MTU:        h.Cfg.Server.MTU,
+			DNS:        h.Config.Server.DNS,
+			MTU:        h.Config.Server.MTU,
 		},
 		Peer: domain.Server{
-			ServerPublicKey: h.Cfg.Server.PublicKey,
-			PresharedKey:    h.Cfg.Server.PresharedKey,
-			AllowedIPs:      h.Cfg.Server.AllowedIPs,
-			Endpoint:        h.Cfg.Server.Endpoint,
+			ServerPublicKey: h.Config.Server.PublicKey,
+			PresharedKey:    h.Config.Server.PresharedKey,
+			AllowedIPs:      h.Config.Server.AllowedIPs,
+			Endpoint:        h.Config.Server.Endpoint,
 		},
 	}, nil
 }
 
 func (h handler) CreateServerConfig(peers []domain.Client) (domain.ServerConfig, error) {
-	privateKey, err := h.readPrivateKey(h.Cfg.Server.PrivateKeyFile)
+	privateKey, err := h.readPrivateKey(h.Config.Server.PrivateKeyFile)
 	if err != nil {
 		return domain.ServerConfig{}, nil
 	}
 	return domain.ServerConfig{
 		ServerInterface: domain.ServerInterface{
-			Address:          h.Cfg.Server.WireguardInterface.Address,
-			ListenPort:       h.Cfg.Server.Port,
+			Address:          h.Config.Server.WireguardInterface.Address,
+			ListenPort:       h.Config.Server.Port,
 			ServerPrivateKey: privateKey,
-			MTU:              h.Cfg.Server.MTU,
-			PostUp:           h.Cfg.Server.PostUp,
-			PostDown:         h.Cfg.Server.PostDown,
+			MTU:              h.Config.Server.MTU,
+			PostUp:           h.Config.Server.PostUp,
+			PostDown:         h.Config.Server.PostDown,
 		},
 		Peers: peers,
 	}, nil

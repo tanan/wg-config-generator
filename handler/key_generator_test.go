@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/tanan/wg-config-generator/config"
 )
 
 type MockCommand struct {
@@ -46,7 +48,7 @@ func Test_handler_CreatePrivateKey(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			h := handler{
 				Command: mockCmd,
-				WorkDir: "dummy",
+				Config:  config.Config{},
 			}
 			got, err := h.CreatePrivateKey()
 			if (err != nil) != tt.wantErr {
@@ -81,7 +83,7 @@ func Test_handler_CreatePreSharedKey(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			h := handler{
 				Command: mockCmd,
-				WorkDir: "dummy",
+				Config:  config.Config{},
 			}
 			got, err := h.CreatePreSharedKey()
 			if (err != nil) != tt.wantErr {
@@ -119,7 +121,7 @@ func Test_handler_CreatePublicKey(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			h := handler{
 				Command: mockCmd,
-				WorkDir: "dummy",
+				Config:  config.Config{},
 			}
 			got, err := h.CreatePublicKey(tt.privateKey)
 			if (err != nil) != tt.wantErr {

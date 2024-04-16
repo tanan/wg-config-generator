@@ -6,20 +6,27 @@ import (
 	"os/exec"
 
 	"github.com/tanan/wg-config-generator/config"
+	"github.com/tanan/wg-config-generator/domain"
 )
 
-type Handler interface{}
+type Handler interface {
+	GetClientList() ([]domain.Client, error)
+	CreateClientConfig(name string, address string) (domain.ClientConfig, error)
+	CreateServerConfig(peers []domain.Client) (domain.ServerConfig, error)
+	WriteServerConfig(domain.ServerConfig) error
+	WriteClientConfig(domain.ClientConfig) error
+	SendClientConfigByEmail(domain.ClientConfig) error
+}
 
 type handler struct {
 	Command
-	Cfg     config.Config
-	WorkDir string
+	Config config.Config
 }
 
-func NewHandler(cmd Command, dir string) Handler {
+func NewHandler(cmd Command, cfg config.Config) Handler {
 	return &handler{
 		Command: cmd,
-		WorkDir: dir,
+		Config:  cfg,
 	}
 }
 
