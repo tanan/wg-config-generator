@@ -13,9 +13,9 @@ type Handler interface {
 	GetClientList() ([]domain.Client, error)
 	CreateClientConfig(name string, address string) (domain.ClientConfig, error)
 	CreateServerConfig(peers []domain.Client) (domain.ServerConfig, error)
-	WriteServerConfig(domain.ServerConfig) error
-	WriteClientConfig(domain.ClientConfig) error
-	SendClientConfigByEmail(domain.ClientConfig) error
+	WriteServerConfig(server domain.ServerConfig) error
+	WriteClientConfig(client domain.ClientConfig) error
+	SendClientConfigByEmail(client domain.ClientConfig) error
 }
 
 type handler struct {
