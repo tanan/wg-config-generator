@@ -1,4 +1,15 @@
-FROM ubuntu:24.04 as builder
+FROM golang:1.22 as builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN go build -v -o wgconf
+
+
+FROM ubuntu:24.04
 
 ARG S6_OVERLAY_VERSION=3.1.6.2
 
@@ -13,6 +24,8 @@ ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLA
 RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
 ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
 RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
+
+COPY --from=builder /app/wgconf /app/wgconf
 
 EXPOSE 51820/udp
 ENTRYPOINT ["/init"]
