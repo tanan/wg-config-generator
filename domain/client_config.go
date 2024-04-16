@@ -10,12 +10,12 @@ type ClientInterface struct {
 	Address    string
 	PrivateKey string
 	DNS        string
-	MTU        string
+	MTU        int
 }
 
 type Server struct {
-	ServerPublicKey string
-	PresharedKey    string
-	AllowedIPs      string
-	Endpoint        string
+	PublicKey    string
+	PresharedKey string
+	AllowedIPs   string
+	Endpoint     string
 }

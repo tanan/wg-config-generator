@@ -19,7 +19,7 @@ type ServerConfig struct {
 	Endpoint           string             `mapstructure:"endpoint"`
 	Port               int                `mapstructure:"port"`
 	DNS                string             `mapstructure:"dns"`
-	MTU                string             `mapstructure:"mtu"`
+	MTU                int                `mapstructure:"mtu"`
 	PrivateKeyFile     string             `mapstructure:"privatekeyfile"`
 	PublicKey          string             `mapstructure:"publickey"`
 	PresharedKey       string             `mapstructure:"presharedkey"`

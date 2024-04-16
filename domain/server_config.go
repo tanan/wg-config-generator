@@ -6,17 +6,17 @@ type ServerConfig struct {
 }
 
 type ServerInterface struct {
-	Address          string
-	ListenPort       int
-	ServerPrivateKey string
-	MTU              string
-	PostUp           string
-	PostDown         string
+	Address    string
+	ListenPort int
+	PrivateKey string
+	MTU        int
+	PostUp     string
+	PostDown   string
 }
 
 type Client struct {
-	Name            string
-	ClientPublicKey string
-	PresharedKey    string
-	AllowedIPs      []string
+	Name         string
+	PublicKey    string
+	PresharedKey string
+	AllowedIPs   []string
 }

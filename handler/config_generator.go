@@ -49,10 +49,10 @@ func (h handler) CreateClientConfig(name string, address string) (domain.ClientC
 			MTU:        h.Config.Server.MTU,
 		},
 		Peer: domain.Server{
-			ServerPublicKey: h.Config.Server.PublicKey,
-			PresharedKey:    h.Config.Server.PresharedKey,
-			AllowedIPs:      h.Config.Server.AllowedIPs,
-			Endpoint:        h.Config.Server.Endpoint,
+			PublicKey:    h.Config.Server.PublicKey,
+			PresharedKey: h.Config.Server.PresharedKey,
+			AllowedIPs:   h.Config.Server.AllowedIPs,
+			Endpoint:     h.Config.Server.Endpoint,
 		},
 	}, nil
 }
@@ -64,12 +64,12 @@ func (h handler) CreateServerConfig(peers []domain.Client) (domain.ServerConfig,
 	}
 	return domain.ServerConfig{
 		ServerInterface: domain.ServerInterface{
-			Address:          h.Config.Server.WireguardInterface.Address,
-			ListenPort:       h.Config.Server.Port,
-			ServerPrivateKey: privateKey,
-			MTU:              h.Config.Server.MTU,
-			PostUp:           h.Config.Server.PostUp,
-			PostDown:         h.Config.Server.PostDown,
+			Address:    h.Config.Server.WireguardInterface.Address,
+			ListenPort: h.Config.Server.Port,
+			PrivateKey: privateKey,
+			MTU:        h.Config.Server.MTU,
+			PostUp:     h.Config.Server.PostUp,
+			PostDown:   h.Config.Server.PostDown,
 		},
 		Peers: peers,
 	}, nil
