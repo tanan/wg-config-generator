@@ -1,22 +1,14 @@
 package domain
 
 type ServerConfig struct {
-	ServerInterface ServerInterface
-	Peers           []Client
-}
-
-type ServerInterface struct {
 	Address    string
 	ListenPort int
+	Endpoint   string
 	PrivateKey string
-	MTU        int
+	PublicKey  string
 	PostUp     string
 	PostDown   string
-}
-
-type Client struct {
-	Name         string
-	PublicKey    string
-	PresharedKey string
-	AllowedIPs   []string
+	DNS        string
+	MTU        int
+	AllowedIPs string
 }

@@ -2,41 +2,38 @@ package handler
 
 import (
 	"fmt"
-	"log/slog"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/tanan/wg-config-generator/domain"
+	"github.com/tanan/wg-config-generator/utils"
 )
 
-func (h handler) WriteServerConfig(server domain.ServerConfig) error {
-	path := filepath.Join(h.Config.WorkDir, "wg0.conf")
-	f, err := os.Create(path)
+func (h handler) WriteServerConfig(server domain.ServerConfig, peers []domain.ClientConfig) error {
+	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, "wg0.conf"))
 	if err != nil {
-		slog.Error(fmt.Sprintf("failed to create file : %s", path))
 		return err
 	}
 
 	var row []string
 	row = append(row, "[Interface]")
-	row = append(row, fmt.Sprintf("Address = %s", server.ServerInterface.Address))
-	row = append(row, fmt.Sprintf("ListenPort = %s", strconv.Itoa(server.ServerInterface.ListenPort)))
-	row = append(row, fmt.Sprintf("PrivateKey = %s", server.ServerInterface.PrivateKey))
-	row = append(row, fmt.Sprintf("MTU = %s", strconv.Itoa(server.ServerInterface.MTU)))
-	row = append(row, fmt.Sprintf("PostUp = %s", server.ServerInterface.PostUp))
-	row = append(row, fmt.Sprintf("PostDown = %s", server.ServerInterface.PostDown))
+	row = append(row, fmt.Sprintf("Address = %s", server.Address))
+	row = append(row, fmt.Sprintf("ListenPort = %s", strconv.Itoa(server.ListenPort)))
+	row = append(row, fmt.Sprintf("PrivateKey = %s", server.PrivateKey))
+	row = append(row, fmt.Sprintf("MTU = %s", strconv.Itoa(server.MTU)))
+	row = append(row, fmt.Sprintf("PostUp = %s", server.PostUp))
+	row = append(row, fmt.Sprintf("PostDown = %s", server.PostDown))
 	f.Write([]byte(strings.Join(row, "\n")))
 
 	f.Write([]byte("\n\n"))
 
-	for _, peer := range server.Peers {
+	for _, peer := range peers {
 		var row []string
 		row = append(row, "[Peer]")
 		row = append(row, fmt.Sprintf("PublicKey = %s", peer.PublicKey))
 		row = append(row, fmt.Sprintf("PresharedKey = %s", peer.PresharedKey))
-		row = append(row, fmt.Sprintf("AllowedIPs = %s", peer.AllowedIPs))
+		row = append(row, fmt.Sprintf("AllowedIPs = %s/32", peer.Address))
 		f.Write([]byte(strings.Join(row, "\n")))
 	}
 
@@ -45,32 +42,42 @@ func (h handler) WriteServerConfig(server domain.ServerConfig) error {
 	return nil
 }
 
-func (h handler) WriteClientConfig(client domain.ClientConfig) error {
-	path := filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", client.Name))
-	f, err := os.Create(path)
+func (h handler) WriteClientConfig(client domain.ClientConfig, server domain.ServerConfig) error {
+	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", client.Name)))
 	if err != nil {
-		slog.Error(fmt.Sprintf("failed to create file : %s", path))
 		return err
 	}
+	defer f.Close()
 
 	var row []string
 	row = append(row, "[Interface]")
-	row = append(row, fmt.Sprintf("Address = %s", client.ClientInterface.Address))
-	row = append(row, fmt.Sprintf("PrivateKey = %s", client.ClientInterface.PrivateKey))
-	row = append(row, fmt.Sprintf("DNS = %s", client.ClientInterface.DNS))
-	row = append(row, fmt.Sprintf("MTU = %s", strconv.Itoa(client.ClientInterface.MTU)))
+	row = append(row, fmt.Sprintf("Address = %s", client.Address))
+	row = append(row, fmt.Sprintf("PrivateKey = %s", client.PrivateKey))
+	row = append(row, fmt.Sprintf("DNS = %s", server.DNS))
+	row = append(row, fmt.Sprintf("MTU = %s", strconv.Itoa(server.MTU)))
 	row = append(row, "")
 	row = append(row, "[Peer]")
-	row = append(row, fmt.Sprintf("PublicKey = %s", client.Peer.PublicKey))
-	row = append(row, fmt.Sprintf("PresharedKey = %s", client.Peer.PresharedKey))
-	row = append(row, fmt.Sprintf("AllowedIPs = %s", client.Peer.AllowedIPs))
-	row = append(row, fmt.Sprintf("Endpoint = %s", client.Peer.Endpoint))
+	row = append(row, fmt.Sprintf("PublicKey = %s", server.PublicKey))
+	row = append(row, fmt.Sprintf("PresharedKey = %s", client.PresharedKey))
+	row = append(row, fmt.Sprintf("AllowedIPs = %s", server.AllowedIPs))
+	row = append(row, fmt.Sprintf("Endpoint = %s", server.Endpoint))
 
 	f.Write([]byte(strings.Join(row, "\n")))
 	f.Write([]byte("\n"))
 	return nil
 }
 
-func (h handler) SendClientConfigByEmail(domain.ClientConfig) error {
+func (h handler) WriteClientSecret(client domain.ClientConfig) error {
+	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, "secrets", fmt.Sprintf("%s.secret", client.Name)))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	f.Write([]byte(client.PrivateKey))
 	return nil
 }
+
+// func (h handler) SendClientConfigByEmail(client domain.ClientConfig, server domain.ServerConfig) error {
+// 	return nil
+// }

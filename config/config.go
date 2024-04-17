@@ -22,7 +22,6 @@ type ServerConfig struct {
 	MTU                int                `mapstructure:"mtu"`
 	PrivateKeyFile     string             `mapstructure:"privatekeyfile"`
 	PublicKey          string             `mapstructure:"publickey"`
-	PresharedKey       string             `mapstructure:"presharedkey"`
 	WireguardInterface WireguardInterface `mapstructure:"interface"`
 	AllowedIPs         string             `mapstructure:"allowedips"`
 	PostUp             string             `mapstructure:"postup"`

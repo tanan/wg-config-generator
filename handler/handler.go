@@ -10,12 +10,12 @@ import (
 )
 
 type Handler interface {
-	GetClientList() ([]domain.Client, error)
+	GetClientList() ([]domain.ClientConfig, error)
 	CreateClientConfig(name string, address string) (domain.ClientConfig, error)
-	CreateServerConfig(peers []domain.Client) (domain.ServerConfig, error)
-	WriteServerConfig(server domain.ServerConfig) error
-	WriteClientConfig(client domain.ClientConfig) error
-	SendClientConfigByEmail(client domain.ClientConfig) error
+	CreateServerConfig(peers []domain.ClientConfig) (domain.ServerConfig, error)
+	WriteServerConfig(server domain.ServerConfig, peers []domain.ClientConfig) error
+	WriteClientConfig(client domain.ClientConfig, server domain.ServerConfig) error
+	// SendClientConfigByEmail(client domain.ClientConfig, server domain.ServerConfig) error
 }
 
 type handler struct {
