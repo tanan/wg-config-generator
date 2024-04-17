@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"log/slog"
 	"os"
-	"path/filepath"
 )
 
 func CreateFile(path string, mode fs.FileMode) (*os.File, error) {
@@ -23,17 +22,16 @@ func CreateFile(path string, mode fs.FileMode) (*os.File, error) {
 	return f, nil
 }
 
-func Makedir(path string, perm fs.FileMode) error {
-	dir := filepath.Dir(path)
+func Makedir(dir string, perm fs.FileMode) error {
 	if info, err := os.Stat(dir); os.IsExist(err) {
 		if info.Mode() == perm {
 			return nil
 		}
 		if err := os.Chmod(dir, perm); err != nil {
-			slog.Error(fmt.Sprintf("failed to change directory permission : %s", path))
+			slog.Error(fmt.Sprintf("failed to change directory permission : %s", dir))
 			return err
 		}
 		return nil
 	}
-	return os.Mkdir(dir, perm)
+	return os.MkdirAll(dir, perm)
 }
