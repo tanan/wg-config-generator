@@ -33,6 +33,7 @@ func Makedir(path string, perm fs.FileMode) error {
 			slog.Error(fmt.Sprintf("failed to change directory permission : %s", path))
 			return err
 		}
+		return nil
 	}
 	return os.Mkdir(dir, perm)
 }
