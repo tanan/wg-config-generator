@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -20,7 +19,6 @@ func init() {
 
 func initConfig(cmd *cobra.Command) {
 	configFile, _ := cmd.Flags().GetString("configFile")
-	fmt.Println(configFile)
 	config.LoadConfig(configFile)
 }
 

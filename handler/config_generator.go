@@ -27,13 +27,13 @@ func (h handler) CreateClientConfig(name string, address string) (domain.ClientC
 	}, nil
 }
 
-func (h handler) CreateServerConfig(peers []domain.ClientConfig) (domain.ServerConfig, error) {
+func (h handler) CreateServerConfig() (domain.ServerConfig, error) {
 	privateKey, err := h.readPrivateKey(h.Config.Server.PrivateKeyFile)
 	if err != nil {
 		return domain.ServerConfig{}, nil
 	}
 	return domain.ServerConfig{
-		Address:    h.Config.Server.WireguardInterface.Address,
+		Address:    h.Config.Server.Address,
 		ListenPort: h.Config.Server.Port,
 		Endpoint:   h.Config.Server.Endpoint,
 		PrivateKey: privateKey,

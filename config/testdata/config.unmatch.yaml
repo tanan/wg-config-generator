@@ -1,7 +1,5 @@
 work_dir: /etc/wireguard
 server:
+  address: 10.0.0.1
   endpoint: 10.0.0.1:51820
-  port: 51820
-  interface:
-    name: wg1
-    address: 10.0.0.1
+  port: 51821

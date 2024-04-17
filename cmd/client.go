@@ -36,7 +36,13 @@ var createClientCmd = &cobra.Command{
 
 		clientConfig, err := h.CreateClientConfig(name, address)
 		if err != nil {
-			slog.Error("output error", slog.String("error", err.Error()))
+			slog.Error("failed to create client config", slog.String("error", err.Error()))
+			os.Exit(1)
+		}
+
+		serverConfig, err := h.CreateServerConfig()
+		if err != nil {
+			slog.Error("failed to create server config", slog.String("error", err.Error()))
 			os.Exit(1)
 		}
 
@@ -44,9 +50,9 @@ var createClientCmd = &cobra.Command{
 		var outputErr error
 		switch outputType {
 		case "text":
-			outputErr = h.WriteClientConfig(clientConfig)
+			outputErr = h.WriteClientConfig(clientConfig, serverConfig)
 		case "email":
-			outputErr = h.SendClientConfigByEmail(clientConfig)
+			outputErr = h.SendClientConfigByEmail(clientConfig, serverConfig)
 		default:
 			outputErr = fmt.Errorf("output type %s is not found", outputType)
 		}

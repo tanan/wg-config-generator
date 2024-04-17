@@ -9,12 +9,9 @@ func TestLoadConfig(t *testing.T) {
 	cfg := Config{
 		WorkDir: "/etc/wireguard",
 		Server: ServerConfig{
+			Address:  "10.0.0.1",
 			Endpoint: "10.0.0.1:51820",
 			Port:     51820,
-			WireguardInterface: WireguardInterface{
-				Name:    "wg0",
-				Address: "10.0.0.1",
-			},
 		},
 	}
 	tests := []struct {

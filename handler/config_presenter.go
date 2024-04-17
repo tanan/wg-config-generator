@@ -11,7 +11,11 @@ import (
 )
 
 func (h handler) WriteServerConfig(server domain.ServerConfig, peers []domain.ClientConfig) error {
-	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, "wg0.conf"))
+	err := utils.Makedir(h.Config.WorkDir, 0700)
+	if err != nil {
+		return err
+	}
+	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", WGInterfaceName)), 0755)
 	if err != nil {
 		return err
 	}
@@ -24,9 +28,9 @@ func (h handler) WriteServerConfig(server domain.ServerConfig, peers []domain.Cl
 	row = append(row, fmt.Sprintf("MTU = %s", strconv.Itoa(server.MTU)))
 	row = append(row, fmt.Sprintf("PostUp = %s", server.PostUp))
 	row = append(row, fmt.Sprintf("PostDown = %s", server.PostDown))
-	f.Write([]byte(strings.Join(row, "\n")))
+	f.WriteString(strings.Join(row, "\n"))
 
-	f.Write([]byte("\n\n"))
+	f.WriteString("\n\n")
 
 	for _, peer := range peers {
 		var row []string
@@ -34,16 +38,20 @@ func (h handler) WriteServerConfig(server domain.ServerConfig, peers []domain.Cl
 		row = append(row, fmt.Sprintf("PublicKey = %s", peer.PublicKey))
 		row = append(row, fmt.Sprintf("PresharedKey = %s", peer.PresharedKey))
 		row = append(row, fmt.Sprintf("AllowedIPs = %s/32", peer.Address))
-		f.Write([]byte(strings.Join(row, "\n")))
+		f.WriteString(strings.Join(row, "\n"))
 	}
 
-	f.Write([]byte("\n"))
+	f.WriteString("\n")
 
 	return nil
 }
 
 func (h handler) WriteClientConfig(client domain.ClientConfig, server domain.ServerConfig) error {
-	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", client.Name)))
+	err := utils.Makedir(h.Config.WorkDir, 0700)
+	if err != nil {
+		return err
+	}
+	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", client.Name)), 0755)
 	if err != nil {
 		return err
 	}
@@ -62,22 +70,27 @@ func (h handler) WriteClientConfig(client domain.ClientConfig, server domain.Ser
 	row = append(row, fmt.Sprintf("AllowedIPs = %s", server.AllowedIPs))
 	row = append(row, fmt.Sprintf("Endpoint = %s", server.Endpoint))
 
-	f.Write([]byte(strings.Join(row, "\n")))
-	f.Write([]byte("\n"))
+	f.WriteString(strings.Join(row, "\n"))
+	f.WriteString("\n")
 	return nil
 }
 
 func (h handler) WriteClientSecret(client domain.ClientConfig) error {
-	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, SecretDir, fmt.Sprintf("%s.secret", client.Name)))
+	err := utils.Makedir(filepath.Join(h.Config.WorkDir, SecretDir), 0700)
+	if err != nil {
+		return err
+	}
+	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, SecretDir, fmt.Sprintf("%s.secret", client.Name)), 0600)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	f.Write([]byte(client.PrivateKey))
+	f.WriteString(client.PrivateKey)
 	return nil
 }
 
-// func (h handler) SendClientConfigByEmail(client domain.ClientConfig, server domain.ServerConfig) error {
-// 	return nil
-// }
+// TODO
+func (h handler) SendClientConfigByEmail(client domain.ClientConfig, server domain.ServerConfig) error {
+	return nil
+}

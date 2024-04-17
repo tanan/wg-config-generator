@@ -16,21 +16,16 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Endpoint           string             `mapstructure:"endpoint"`
-	Port               int                `mapstructure:"port"`
-	DNS                string             `mapstructure:"dns"`
-	MTU                int                `mapstructure:"mtu"`
-	PrivateKeyFile     string             `mapstructure:"privatekeyfile"`
-	PublicKey          string             `mapstructure:"publickey"`
-	WireguardInterface WireguardInterface `mapstructure:"interface"`
-	AllowedIPs         string             `mapstructure:"allowedips"`
-	PostUp             string             `mapstructure:"postup"`
-	PostDown           string             `mapstructure:"postdown"`
-}
-
-type WireguardInterface struct {
-	Name    string `mapstructure:"name"`
-	Address string `mapstructure:"address"`
+	Address        string `mapstructure:"address"`
+	Endpoint       string `mapstructure:"endpoint"`
+	Port           int    `mapstructure:"port"`
+	DNS            string `mapstructure:"dns"`
+	MTU            int    `mapstructure:"mtu"`
+	PrivateKeyFile string `mapstructure:"privatekeyfile"`
+	PublicKey      string `mapstructure:"publickey"`
+	AllowedIPs     string `mapstructure:"allowedips"`
+	PostUp         string `mapstructure:"postup"`
+	PostDown       string `mapstructure:"postdown"`
 }
 
 func GetConfig() Config {
