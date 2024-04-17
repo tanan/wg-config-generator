@@ -30,18 +30,19 @@ func (h handler) WriteServerConfig(server domain.ServerConfig, peers []domain.Cl
 	row = append(row, fmt.Sprintf("PostDown = %s", server.PostDown))
 	f.WriteString(strings.Join(row, "\n"))
 
-	f.WriteString("\n\n")
+	f.WriteString("\n")
 
 	for _, peer := range peers {
 		var row []string
+		f.WriteString("\n")
+		row = append(row, fmt.Sprintf("# %s", peer.Name))
 		row = append(row, "[Peer]")
 		row = append(row, fmt.Sprintf("PublicKey = %s", peer.PublicKey))
 		row = append(row, fmt.Sprintf("PresharedKey = %s", peer.PresharedKey))
 		row = append(row, fmt.Sprintf("AllowedIPs = %s/32", peer.Address))
 		f.WriteString(strings.Join(row, "\n"))
+		f.WriteString("\n")
 	}
-
-	f.WriteString("\n")
 
 	return nil
 }

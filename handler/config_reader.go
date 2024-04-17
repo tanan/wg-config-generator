@@ -49,12 +49,6 @@ func (h handler) readClient(dir string, entry fs.DirEntry) (domain.ClientConfig,
 		return domain.ClientConfig{}, err
 	}
 
-	privateKey, err := h.readPrivateKey(filepath.Join(dir, SecretDir, entry.Name()))
-	if err != nil {
-		return domain.ClientConfig{}, err
-	}
-	client.PrivateKey = privateKey
-
 	return client, nil
 }
 
