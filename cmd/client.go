@@ -58,8 +58,10 @@ var createClientCmd = &cobra.Command{
 }
 
 func init() {
-	clientCmd.Flags().StringP("ip-address", "i", "", "ip address for client")
-	clientCmd.Flags().StringP("output-type", "t", "text", "client configuration output type: [text|email]")
+	createClientCmd.Flags().StringP("ip-address", "i", "", "ip address for client")
+	createClientCmd.Flags().StringP("output-type", "t", "text", "client configuration output type: [text|email]")
+	createClientCmd.MarkFlagRequired("ip-address")
+	createClientCmd.MarkFlagRequired("output-type")
 	clientCmd.AddCommand(createClientCmd)
 	rootCmd.AddCommand(clientCmd)
 }
