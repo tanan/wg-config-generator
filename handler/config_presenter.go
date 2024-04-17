@@ -15,7 +15,7 @@ func (h handler) WriteServerConfig(server domain.ServerConfig, peers []domain.Cl
 	if err != nil {
 		return err
 	}
-	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", WGInterfaceName)), 0755)
+	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", WGInterfaceName)), 0600)
 	if err != nil {
 		return err
 	}
@@ -47,11 +47,8 @@ func (h handler) WriteServerConfig(server domain.ServerConfig, peers []domain.Cl
 }
 
 func (h handler) WriteClientConfig(client domain.ClientConfig, server domain.ServerConfig) error {
-	err := utils.Makedir(h.Config.WorkDir, 0700)
-	if err != nil {
-		return err
-	}
-	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", client.Name)), 0755)
+	// create a client profile to current path
+	f, err := utils.CreateFile(fmt.Sprintf("%s.conf", client.Name), 0600)
 	if err != nil {
 		return err
 	}
