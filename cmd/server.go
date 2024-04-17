@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log/slog"
 
 	"github.com/spf13/cobra"
@@ -16,8 +17,14 @@ var serverCmd = &cobra.Command{
 
 wgconf server create -c /path/to/config.yaml -o /path/to/output.conf
 `,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		initConfig(cmd)
+
+		action := args[0]
+		if action != "create" {
+			slog.Error(fmt.Sprintf("unknown command %v", action))
+		}
 
 		h := handler.NewHandler(handler.NewCommand(), config.GetConfig())
 		peers, err := h.GetClientList()
