@@ -8,5 +8,5 @@ server:
   privatekeyfile: ./app/wireguard/.serverkey
   publickey: publickey
   allowedips: 192.168.227.0/22
-  postup:
-  postdown:
+  postup: iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+  postdown: iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
