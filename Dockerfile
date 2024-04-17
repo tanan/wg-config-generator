@@ -27,5 +27,7 @@ RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
 
 COPY --from=builder /app/wgconf /app/wgconf
 
+COPY config.yaml /app/config.yaml
+
 EXPOSE 51820/udp
 ENTRYPOINT ["/init"]
