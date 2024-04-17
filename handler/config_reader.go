@@ -6,12 +6,13 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/tanan/wg-config-generator/domain"
 )
 
 func (h handler) GetClientList() ([]domain.ClientConfig, error) {
-	clientWorkDir := filepath.Join(h.Config.WorkDir, "clients")
+	clientWorkDir := filepath.Join(h.Config.WorkDir, ClientDir)
 	files, err := os.ReadDir(clientWorkDir)
 	if err != nil {
 		return nil, err
@@ -48,7 +49,25 @@ func (h handler) readClient(dir string, entry fs.DirEntry) (domain.ClientConfig,
 		return domain.ClientConfig{}, err
 	}
 
-	// TODO: read private key file
+	privateKey, err := h.readPrivateKey(filepath.Join(dir, SecretDir, entry.Name()))
+	if err != nil {
+		return domain.ClientConfig{}, err
+	}
+	client.PrivateKey = privateKey
 
 	return client, nil
+}
+
+func (h handler) readPrivateKey(fn string) (string, error) {
+	f, err := os.Open(fn)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	data, err := io.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+	return strings.Trim(string(data), " \t\n"), nil
 }

@@ -1,10 +1,6 @@
 package handler
 
 import (
-	"io"
-	"os"
-	"strings"
-
 	"github.com/tanan/wg-config-generator/domain"
 )
 
@@ -14,7 +10,13 @@ func (h handler) CreateClientConfig(name string, address string) (domain.ClientC
 		return domain.ClientConfig{}, err
 	}
 	publicKey, err := h.CreatePublicKey(privateKey)
+	if err != nil {
+		return domain.ClientConfig{}, err
+	}
 	presharedKey, err := h.CreatePreSharedKey()
+	if err != nil {
+		return domain.ClientConfig{}, err
+	}
 
 	return domain.ClientConfig{
 		Name:         name,
@@ -42,18 +44,4 @@ func (h handler) CreateServerConfig(peers []domain.ClientConfig) (domain.ServerC
 		MTU:        h.Config.Server.MTU,
 		AllowedIPs: h.Config.Server.AllowedIPs,
 	}, nil
-}
-
-func (h handler) readPrivateKey(fn string) (string, error) {
-	f, err := os.Open(fn)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-
-	data, err := io.ReadAll(f)
-	if err != nil {
-		return "", err
-	}
-	return strings.Trim(string(data), " \t\n"), nil
 }

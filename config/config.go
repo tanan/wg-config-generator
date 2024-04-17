@@ -31,7 +31,6 @@ type ServerConfig struct {
 type WireguardInterface struct {
 	Name    string `mapstructure:"name"`
 	Address string `mapstructure:"address"`
-	Network string `mapstructure:"network"`
 }
 
 func GetConfig() Config {

@@ -14,7 +14,6 @@ func TestLoadConfig(t *testing.T) {
 			WireguardInterface: WireguardInterface{
 				Name:    "wg0",
 				Address: "10.0.0.1",
-				Network: "10.0.0.1/24",
 			},
 		},
 	}

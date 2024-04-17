@@ -9,6 +9,11 @@ import (
 	"github.com/tanan/wg-config-generator/domain"
 )
 
+const (
+	ClientDir = "clients"
+	SecretDir = "secrets"
+)
+
 type Handler interface {
 	GetClientList() ([]domain.ClientConfig, error)
 	CreateClientConfig(name string, address string) (domain.ClientConfig, error)

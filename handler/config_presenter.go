@@ -68,7 +68,7 @@ func (h handler) WriteClientConfig(client domain.ClientConfig, server domain.Ser
 }
 
 func (h handler) WriteClientSecret(client domain.ClientConfig) error {
-	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, "secrets", fmt.Sprintf("%s.secret", client.Name)))
+	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, SecretDir, fmt.Sprintf("%s.secret", client.Name)))
 	if err != nil {
 		return err
 	}
