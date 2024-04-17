@@ -1,4 +1,4 @@
-work_dir: /app/wireguard
+work_dir: ./app/wireguard
 server:
   address: 192.168.227.1
   endpoint: 192.168.227.1:51820
