@@ -133,7 +133,7 @@ func Test_handler_WriteClientConfig(t *testing.T) {
 			if err := h.WriteClientConfig(tt.args.client, tt.args.server); (err != nil) != tt.wantErr {
 				t.Errorf("handler.WriteClientConfig() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			got, want, err := readFiles(filepath.Join(h.getClientSecretDir(), fmt.Sprintf("%s.conf", tt.args.client.Name)), filepath.Join("testdata", fmt.Sprintf("%s.conf", tt.args.client.Name)))
+			got, want, err := readFiles(filepath.Join(h.getClientSecretDir(), fmt.Sprintf("%s.conf", tt.args.client.Name)), filepath.Join("testdata", "clients", "secrets", fmt.Sprintf("%s.conf", tt.args.client.Name)))
 			if err != nil {
 				t.Fatalf("readFile() error : %v", err)
 			}

@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,7 +11,7 @@ import (
 )
 
 func (h handler) GetClientList() ([]model.ClientConfig, error) {
-	clientWorkDir := filepath.Join(h.Config.WorkDir, ClientDir)
+	clientWorkDir := h.getClientDir()
 	files, err := os.ReadDir(clientWorkDir)
 	if err != nil {
 		return nil, err
@@ -22,7 +21,7 @@ func (h handler) GetClientList() ([]model.ClientConfig, error) {
 
 	for _, entry := range files {
 		if !entry.IsDir() {
-			client, err := h.readClient(clientWorkDir, entry)
+			client, err := h.readClient(filepath.Join(clientWorkDir, entry.Name()))
 			if err != nil {
 				return nil, err
 			}
@@ -32,8 +31,8 @@ func (h handler) GetClientList() ([]model.ClientConfig, error) {
 	return clientList, nil
 }
 
-func (h handler) readClient(dir string, entry fs.DirEntry) (model.ClientConfig, error) {
-	file, err := os.Open(filepath.Join(dir, entry.Name()))
+func (h handler) readClient(fn string) (model.ClientConfig, error) {
+	file, err := os.Open(fn)
 	if err != nil {
 		return model.ClientConfig{}, err
 	}

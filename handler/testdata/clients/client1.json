@@ -1,0 +1,6 @@
+{
+    "Name": "client1",
+    "Address": "10.0.10.1",
+    "PublicKey": "PublicKey",
+    "PresharedKey": "PresharedKey"
+}
