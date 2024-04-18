@@ -6,8 +6,8 @@ MTU = 1420
 PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
 
-# user1
+# peer1
 [Peer]
-PublicKey = PublicKey
-PresharedKey = PresharedKey
-AllowedIPs = 10.1.0.2/32
+PublicKey = peer1PublicKey
+PresharedKey = peer1PresharedKey
+AllowedIPs = 192.168.227.2/32

@@ -4,6 +4,7 @@ import (
 	"io"
 	"log/slog"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/tanan/wg-config-generator/config"
 	"github.com/tanan/wg-config-generator/model"
@@ -34,6 +35,14 @@ func NewHandler(cmd Command, cfg config.Config) Handler {
 		Command: cmd,
 		Config:  cfg,
 	}
+}
+
+func (h handler) getClientDir() string {
+	return filepath.Join(h.Config.WorkDir, ClientDir)
+}
+
+func (h handler) getClientSecretDir() string {
+	return filepath.Join(h.Config.WorkDir, ClientDir, SecretDir)
 }
 
 type Command interface {

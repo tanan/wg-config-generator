@@ -11,7 +11,7 @@ import (
 	"github.com/tanan/wg-config-generator/model"
 )
 
-func readFile(gotFn string, wantFn string) (got string, want string, err error) {
+func readFiles(gotFn string, wantFn string) (got string, want string, err error) {
 	g, err := os.ReadFile(gotFn)
 	if err != nil {
 		return "", "", err
@@ -24,17 +24,26 @@ func readFile(gotFn string, wantFn string) (got string, want string, err error) 
 }
 
 func Test_handler_WriteServerConfig(t *testing.T) {
-	server := model.ServerConfig{
+	server1 := model.ServerConfig{
 		Address:    "192.168.227.1",
 		ListenPort: 51820,
-		Endpoint:   "192.168.227.1",
 		PrivateKey: "PrivateKey",
 		PublicKey:  "PublicKey",
-		PostUp:     "iptables -A FORWARD -i %!i(MISSING) -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE",
-		PostDown:   "iptables -D FORWARD -i %!i(MISSING) -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE",
-		DNS:        "",
+		PostUp:     "iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE",
+		PostDown:   "iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE",
 		MTU:        1420,
 		AllowedIPs: "192.168.227.0/24",
+	}
+
+	server2 := model.ServerConfig{
+		Address:    "192.168.228.1",
+		ListenPort: 51821,
+		PrivateKey: "PrivateKey2",
+		PublicKey:  "PublicKey2",
+		PostUp:     "iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE",
+		PostDown:   "iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth1 -j MASQUERADE",
+		MTU:        1400,
+		AllowedIPs: "192.168.228.0/24",
 	}
 
 	peers := []model.ClientConfig{
@@ -56,7 +65,8 @@ func Test_handler_WriteServerConfig(t *testing.T) {
 		wantFileName string
 		wantErr      bool
 	}{
-		{name: "success", args: args{server: server, peers: peers}, wantFileName: "wg0.success.conf", wantErr: false},
+		{name: "ok", args: args{server: server1, peers: peers}, wantFileName: "wg0.conf.1", wantErr: false},
+		{name: "ng", args: args{server: server2, peers: peers}, wantFileName: "wg0.conf.2", wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -68,102 +78,67 @@ func Test_handler_WriteServerConfig(t *testing.T) {
 				t.Errorf("handler.WriteServerConfig() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			got, want, err := readFile(filepath.Join("testdata", tt.wantFileName), filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", WGInterfaceName)))
+			got, want, err := readFiles(filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", WGInterfaceName)), filepath.Join("testdata", tt.wantFileName))
 			if err != nil {
-				t.Fatalf("handler.CreateWGServerConfig() error : %v", err)
+				t.Fatalf("readFile() error : %v", err)
 			}
 
 			if diff := cmp.Diff(want, got); diff != "" {
-				t.Errorf(diff)
+				t.Error(diff)
 			}
 		})
 	}
 }
 
 func Test_handler_WriteClientConfig(t *testing.T) {
-	type fields struct {
-		Command Command
-		Config  config.Config
+	server := model.ServerConfig{
+		Endpoint:   "192.168.227.1:51820",
+		PublicKey:  "PublicKey",
+		MTU:        1420,
+		DNS:        "10.2.0.8",
+		AllowedIPs: "192.168.227.0/24",
 	}
+
+	client1 := model.ClientConfig{
+		Name:         "client1",
+		Address:      "10.1.0.2",
+		PrivateKey:   "PrivateKey",
+		PresharedKey: "PresharedKey",
+	}
+
+	client2 := model.ClientConfig{
+		Name:         "client2",
+		Address:      "10.1.0.3",
+		PrivateKey:   "PrivateKey2",
+		PresharedKey: "PresharedKey2",
+	}
+
 	type args struct {
 		client model.ClientConfig
 		server model.ServerConfig
 	}
 	tests := []struct {
 		name    string
-		fields  fields
 		args    args
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{name: "client1", args: args{client: client1, server: server}, wantErr: false},
+		{name: "client2", args: args{client: client2, server: server}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := handler{
-				Command: tt.fields.Command,
-				Config:  tt.fields.Config,
+				Config: config.Config{WorkDir: t.TempDir()},
 			}
 			if err := h.WriteClientConfig(tt.args.client, tt.args.server); (err != nil) != tt.wantErr {
 				t.Errorf("handler.WriteClientConfig() error = %v, wantErr %v", err, tt.wantErr)
 			}
-		})
-	}
-}
-
-func Test_handler_WriteClientSecret(t *testing.T) {
-	type fields struct {
-		Command Command
-		Config  config.Config
-	}
-	type args struct {
-		client model.ClientConfig
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			h := handler{
-				Command: tt.fields.Command,
-				Config:  tt.fields.Config,
+			got, want, err := readFiles(filepath.Join(h.getClientSecretDir(), fmt.Sprintf("%s.conf", tt.args.client.Name)), filepath.Join("testdata", fmt.Sprintf("%s.conf", tt.args.client.Name)))
+			if err != nil {
+				t.Fatalf("readFile() error : %v", err)
 			}
-			if err := h.WriteClientSecret(tt.args.client); (err != nil) != tt.wantErr {
-				t.Errorf("handler.WriteClientSecret() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func Test_handler_SendClientConfigByEmail(t *testing.T) {
-	type fields struct {
-		Command Command
-		Config  config.Config
-	}
-	type args struct {
-		client model.ClientConfig
-		server model.ServerConfig
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			h := handler{
-				Command: tt.fields.Command,
-				Config:  tt.fields.Config,
-			}
-			if err := h.SendClientConfigByEmail(tt.args.client, tt.args.server); (err != nil) != tt.wantErr {
-				t.Errorf("handler.SendClientConfigByEmail() error = %v, wantErr %v", err, tt.wantErr)
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Error(diff)
 			}
 		})
 	}

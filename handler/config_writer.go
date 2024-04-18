@@ -48,8 +48,13 @@ func (h handler) WriteServerConfig(server model.ServerConfig, peers []model.Clie
 }
 
 func (h handler) WriteClientConfig(client model.ClientConfig, server model.ServerConfig) error {
-	// create a client profile to current path
-	f, err := util.CreateFile(fmt.Sprintf("%s.conf", client.Name), 0600)
+	// write client config in secret dir since client profile includes a private key
+	dir := h.getClientSecretDir()
+	err := util.Makedir(dir, 0700)
+	if err != nil {
+		return err
+	}
+	f, err := util.CreateFile(filepath.Join(dir, fmt.Sprintf("%s.conf", client.Name)), 0600)
 	if err != nil {
 		return err
 	}
@@ -70,21 +75,6 @@ func (h handler) WriteClientConfig(client model.ClientConfig, server model.Serve
 
 	f.WriteString(strings.Join(row, "\n"))
 	f.WriteString("\n")
-	return nil
-}
-
-func (h handler) WriteClientSecret(client model.ClientConfig) error {
-	err := util.Makedir(filepath.Join(h.Config.WorkDir, SecretDir), 0700)
-	if err != nil {
-		return err
-	}
-	f, err := util.CreateFile(filepath.Join(h.Config.WorkDir, SecretDir, fmt.Sprintf("%s.secret", client.Name)), 0600)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	f.WriteString(client.PrivateKey)
 	return nil
 }
 
