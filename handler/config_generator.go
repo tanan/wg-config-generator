@@ -5,25 +5,25 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/tanan/wg-config-generator/domain"
-	"github.com/tanan/wg-config-generator/utils"
+	"github.com/tanan/wg-config-generator/model"
+	"github.com/tanan/wg-config-generator/util"
 )
 
-func (h handler) CreateClientConfig(name string, address string) (domain.ClientConfig, error) {
+func (h handler) CreateClientConfig(name string, address string) (model.ClientConfig, error) {
 	privateKey, err := h.CreatePrivateKey()
 	if err != nil {
-		return domain.ClientConfig{}, err
+		return model.ClientConfig{}, err
 	}
 	publicKey, err := h.CreatePublicKey(privateKey)
 	if err != nil {
-		return domain.ClientConfig{}, err
+		return model.ClientConfig{}, err
 	}
 	presharedKey, err := h.CreatePreSharedKey()
 	if err != nil {
-		return domain.ClientConfig{}, err
+		return model.ClientConfig{}, err
 	}
 
-	clientConfig := domain.ClientConfig{
+	clientConfig := model.ClientConfig{
 		Name:         name,
 		Address:      address,
 		PrivateKey:   privateKey,
@@ -32,17 +32,17 @@ func (h handler) CreateClientConfig(name string, address string) (domain.ClientC
 	}
 
 	if err := h.saveClientConfig(clientConfig); err != nil {
-		return domain.ClientConfig{}, err
+		return model.ClientConfig{}, err
 	}
 
 	return clientConfig, nil
 }
 
-func (h handler) saveClientConfig(clientConfig domain.ClientConfig) error {
-	if err := utils.Makedir(filepath.Join(h.Config.WorkDir, ClientDir), 0700); err != nil {
+func (h handler) saveClientConfig(clientConfig model.ClientConfig) error {
+	if err := util.Makedir(filepath.Join(h.Config.WorkDir, ClientDir), 0700); err != nil {
 		return err
 	}
-	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, ClientDir, fmt.Sprintf("%s.json", clientConfig.Name)), 0600)
+	f, err := util.CreateFile(filepath.Join(h.Config.WorkDir, ClientDir, fmt.Sprintf("%s.json", clientConfig.Name)), 0600)
 	if err != nil {
 		return err
 	}
@@ -53,12 +53,12 @@ func (h handler) saveClientConfig(clientConfig domain.ClientConfig) error {
 	return nil
 }
 
-func (h handler) CreateServerConfig() (domain.ServerConfig, error) {
+func (h handler) CreateServerConfig() (model.ServerConfig, error) {
 	privateKey, err := h.readPrivateKey(h.Config.Server.PrivateKeyFile)
 	if err != nil {
-		return domain.ServerConfig{}, err
+		return model.ServerConfig{}, err
 	}
-	return domain.ServerConfig{
+	return model.ServerConfig{
 		Address:    h.Config.Server.Address,
 		ListenPort: h.Config.Server.Port,
 		Endpoint:   h.Config.Server.Endpoint,

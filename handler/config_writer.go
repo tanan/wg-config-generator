@@ -6,16 +6,16 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tanan/wg-config-generator/domain"
-	"github.com/tanan/wg-config-generator/utils"
+	"github.com/tanan/wg-config-generator/model"
+	"github.com/tanan/wg-config-generator/util"
 )
 
-func (h handler) WriteServerConfig(server domain.ServerConfig, peers []domain.ClientConfig) error {
-	err := utils.Makedir(h.Config.WorkDir, 0700)
+func (h handler) WriteServerConfig(server model.ServerConfig, peers []model.ClientConfig) error {
+	err := util.Makedir(h.Config.WorkDir, 0700)
 	if err != nil {
 		return err
 	}
-	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", WGInterfaceName)), 0600)
+	f, err := util.CreateFile(filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", WGInterfaceName)), 0600)
 	if err != nil {
 		return err
 	}
@@ -47,9 +47,9 @@ func (h handler) WriteServerConfig(server domain.ServerConfig, peers []domain.Cl
 	return nil
 }
 
-func (h handler) WriteClientConfig(client domain.ClientConfig, server domain.ServerConfig) error {
+func (h handler) WriteClientConfig(client model.ClientConfig, server model.ServerConfig) error {
 	// create a client profile to current path
-	f, err := utils.CreateFile(fmt.Sprintf("%s.conf", client.Name), 0600)
+	f, err := util.CreateFile(fmt.Sprintf("%s.conf", client.Name), 0600)
 	if err != nil {
 		return err
 	}
@@ -73,12 +73,12 @@ func (h handler) WriteClientConfig(client domain.ClientConfig, server domain.Ser
 	return nil
 }
 
-func (h handler) WriteClientSecret(client domain.ClientConfig) error {
-	err := utils.Makedir(filepath.Join(h.Config.WorkDir, SecretDir), 0700)
+func (h handler) WriteClientSecret(client model.ClientConfig) error {
+	err := util.Makedir(filepath.Join(h.Config.WorkDir, SecretDir), 0700)
 	if err != nil {
 		return err
 	}
-	f, err := utils.CreateFile(filepath.Join(h.Config.WorkDir, SecretDir, fmt.Sprintf("%s.secret", client.Name)), 0600)
+	f, err := util.CreateFile(filepath.Join(h.Config.WorkDir, SecretDir, fmt.Sprintf("%s.secret", client.Name)), 0600)
 	if err != nil {
 		return err
 	}
@@ -89,6 +89,6 @@ func (h handler) WriteClientSecret(client domain.ClientConfig) error {
 }
 
 // TODO
-func (h handler) SendClientConfigByEmail(client domain.ClientConfig, server domain.ServerConfig) error {
+func (h handler) SendClientConfigByEmail(client model.ClientConfig, server model.ServerConfig) error {
 	return nil
 }

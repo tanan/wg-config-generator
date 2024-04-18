@@ -8,17 +8,17 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tanan/wg-config-generator/domain"
+	"github.com/tanan/wg-config-generator/model"
 )
 
-func (h handler) GetClientList() ([]domain.ClientConfig, error) {
+func (h handler) GetClientList() ([]model.ClientConfig, error) {
 	clientWorkDir := filepath.Join(h.Config.WorkDir, ClientDir)
 	files, err := os.ReadDir(clientWorkDir)
 	if err != nil {
 		return nil, err
 	}
 
-	var clientList []domain.ClientConfig
+	var clientList []model.ClientConfig
 
 	for _, entry := range files {
 		if !entry.IsDir() {
@@ -32,21 +32,21 @@ func (h handler) GetClientList() ([]domain.ClientConfig, error) {
 	return clientList, nil
 }
 
-func (h handler) readClient(dir string, entry fs.DirEntry) (domain.ClientConfig, error) {
+func (h handler) readClient(dir string, entry fs.DirEntry) (model.ClientConfig, error) {
 	file, err := os.Open(filepath.Join(dir, entry.Name()))
 	if err != nil {
-		return domain.ClientConfig{}, err
+		return model.ClientConfig{}, err
 	}
 
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return domain.ClientConfig{}, err
+		return model.ClientConfig{}, err
 	}
 	defer file.Close()
 
-	var client domain.ClientConfig
+	var client model.ClientConfig
 	if err := json.Unmarshal(data, &client); err != nil {
-		return domain.ClientConfig{}, err
+		return model.ClientConfig{}, err
 	}
 
 	return client, nil

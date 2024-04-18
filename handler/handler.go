@@ -6,7 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/tanan/wg-config-generator/config"
-	"github.com/tanan/wg-config-generator/domain"
+	"github.com/tanan/wg-config-generator/model"
 )
 
 const (
@@ -16,12 +16,12 @@ const (
 )
 
 type Handler interface {
-	GetClientList() ([]domain.ClientConfig, error)
-	CreateClientConfig(name string, address string) (domain.ClientConfig, error)
-	CreateServerConfig() (domain.ServerConfig, error)
-	WriteServerConfig(server domain.ServerConfig, peers []domain.ClientConfig) error
-	WriteClientConfig(client domain.ClientConfig, server domain.ServerConfig) error
-	SendClientConfigByEmail(client domain.ClientConfig, server domain.ServerConfig) error
+	GetClientList() ([]model.ClientConfig, error)
+	CreateClientConfig(name string, address string) (model.ClientConfig, error)
+	CreateServerConfig() (model.ServerConfig, error)
+	WriteServerConfig(server model.ServerConfig, peers []model.ClientConfig) error
+	WriteClientConfig(client model.ClientConfig, server model.ServerConfig) error
+	SendClientConfigByEmail(client model.ClientConfig, server model.ServerConfig) error
 }
 
 type handler struct {
