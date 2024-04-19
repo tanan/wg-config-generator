@@ -70,29 +70,22 @@ func Test_handler_readClient(t *testing.T) {
 }
 
 func Test_handler_readPrivateKey(t *testing.T) {
-	type fields struct {
-		Command Command
-		Config  config.Config
-	}
-	type args struct {
-		fn string
-	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		fn      string
 		want    string
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{name: "dummy.privatekey", fn: "dummy.privatekey", want: "privatekey", wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := handler{
-				Command: tt.fields.Command,
-				Config:  tt.fields.Config,
+				Config: config.Config{
+					WorkDir: "testdata",
+				},
 			}
-			got, err := h.readPrivateKey(tt.args.fn)
+			got, err := h.readPrivateKey(filepath.Join("testdata", tt.fn))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("handler.readPrivateKey() error = %v, wantErr %v", err, tt.wantErr)
 				return
