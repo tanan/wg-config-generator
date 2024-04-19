@@ -26,7 +26,7 @@ func isEqualCmd(cmd1, cmd2 *exec.Cmd) bool {
 	return true
 }
 
-func Test_handler_CreatePrivateKey(t *testing.T) {
+func Test_handler_createPrivateKey(t *testing.T) {
 	key := "privatekey"
 	mockCmd := &MockCommand{
 		ExecCommandFunc: func(cmd *exec.Cmd, stdin io.Reader) (string, error) {
@@ -50,7 +50,7 @@ func Test_handler_CreatePrivateKey(t *testing.T) {
 				Command: mockCmd,
 				Config:  config.Config{},
 			}
-			got, err := h.CreatePrivateKey()
+			got, err := h.createPrivateKey()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("handler.CreatePrivateKey() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -62,7 +62,7 @@ func Test_handler_CreatePrivateKey(t *testing.T) {
 	}
 }
 
-func Test_handler_CreatePreSharedKey(t *testing.T) {
+func Test_handler_createPreSharedKey(t *testing.T) {
 	key := "presharedkey"
 	mockCmd := &MockCommand{
 		ExecCommandFunc: func(cmd *exec.Cmd, stdin io.Reader) (string, error) {
@@ -85,7 +85,7 @@ func Test_handler_CreatePreSharedKey(t *testing.T) {
 				Command: mockCmd,
 				Config:  config.Config{},
 			}
-			got, err := h.CreatePreSharedKey()
+			got, err := h.createPreSharedKey()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("handler.CreatePreSharedKey() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -97,7 +97,7 @@ func Test_handler_CreatePreSharedKey(t *testing.T) {
 	}
 }
 
-func Test_handler_CreatePublicKey(t *testing.T) {
+func Test_handler_createPublicKey(t *testing.T) {
 	pubKey := "publickey"
 	privateKey := "privatekey"
 	mockCmd := &MockCommand{
@@ -123,7 +123,7 @@ func Test_handler_CreatePublicKey(t *testing.T) {
 				Command: mockCmd,
 				Config:  config.Config{},
 			}
-			got, err := h.CreatePublicKey(tt.privateKey)
+			got, err := h.createPublicKey(tt.privateKey)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("handler.CreatePublicKey() error = %v, wantErr %v", err, tt.wantErr)
 				return

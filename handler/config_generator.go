@@ -10,15 +10,15 @@ import (
 )
 
 func (h handler) CreateClientConfig(name string, address string) (model.ClientConfig, error) {
-	privateKey, err := h.CreatePrivateKey()
+	privateKey, err := h.createPrivateKey()
 	if err != nil {
 		return model.ClientConfig{}, err
 	}
-	publicKey, err := h.CreatePublicKey(privateKey)
+	publicKey, err := h.createPublicKey(privateKey)
 	if err != nil {
 		return model.ClientConfig{}, err
 	}
-	presharedKey, err := h.CreatePreSharedKey()
+	presharedKey, err := h.createPreSharedKey()
 	if err != nil {
 		return model.ClientConfig{}, err
 	}

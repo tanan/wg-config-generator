@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (h handler) CreatePrivateKey() (string, error) {
+func (h handler) createPrivateKey() (string, error) {
 	privateKey, err := h.ExecCommand(exec.Command("wg", "genkey"), nil)
 	if err != nil {
 		return "", err
@@ -13,7 +13,7 @@ func (h handler) CreatePrivateKey() (string, error) {
 	return strings.Trim(privateKey, "\n"), nil
 }
 
-func (h handler) CreatePreSharedKey() (string, error) {
+func (h handler) createPreSharedKey() (string, error) {
 	preSharedKey, err := h.ExecCommand(exec.Command("wg", "genpsk"), nil)
 	if err != nil {
 		return "", err
@@ -21,7 +21,7 @@ func (h handler) CreatePreSharedKey() (string, error) {
 	return strings.Trim(preSharedKey, "\n"), nil
 }
 
-func (h handler) CreatePublicKey(privateKey string) (string, error) {
+func (h handler) createPublicKey(privateKey string) (string, error) {
 	publicKey, err := h.ExecCommand(exec.Command("wg", "pubkey"), strings.NewReader(privateKey))
 	if err != nil {
 		return "", err
