@@ -1,24 +1,19 @@
 package handler
 
 import (
-	"encoding/json"
-	"fmt"
-	"path/filepath"
-
 	"github.com/tanan/wg-config-generator/model"
-	"github.com/tanan/wg-config-generator/util"
 )
 
 func (h handler) CreateClientConfig(name string, address string) (model.ClientConfig, error) {
-	privateKey, err := h.createPrivateKey()
+	privateKey, err := h.Command.CreatePrivateKey()
 	if err != nil {
 		return model.ClientConfig{}, err
 	}
-	publicKey, err := h.createPublicKey(privateKey)
+	publicKey, err := h.Command.CreatePublicKey(privateKey)
 	if err != nil {
 		return model.ClientConfig{}, err
 	}
-	presharedKey, err := h.createPreSharedKey()
+	presharedKey, err := h.Command.CreatePreSharedKey()
 	if err != nil {
 		return model.ClientConfig{}, err
 	}
@@ -31,26 +26,7 @@ func (h handler) CreateClientConfig(name string, address string) (model.ClientCo
 		PresharedKey: presharedKey,
 	}
 
-	if err := h.saveClientConfig(clientConfig); err != nil {
-		return model.ClientConfig{}, err
-	}
-
 	return clientConfig, nil
-}
-
-func (h handler) saveClientConfig(clientConfig model.ClientConfig) error {
-	if err := util.Makedir(filepath.Join(h.Config.WorkDir, ClientDir), 0700); err != nil {
-		return err
-	}
-	f, err := util.CreateFile(filepath.Join(h.Config.WorkDir, ClientDir, fmt.Sprintf("%s.json", clientConfig.Name)), 0600)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	data, _ := json.MarshalIndent(clientConfig, "", "    ")
-	f.Write(data)
-	return nil
 }
 
 func (h handler) CreateServerConfig() (model.ServerConfig, error) {

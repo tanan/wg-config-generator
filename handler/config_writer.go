@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"strconv"
@@ -11,11 +12,11 @@ import (
 )
 
 func (h handler) WriteServerConfig(server model.ServerConfig, peers []model.ClientConfig) error {
-	err := util.Makedir(h.Config.WorkDir, 0700)
+	err := util.Makedir(h.getWorkDir(), 0700)
 	if err != nil {
 		return err
 	}
-	f, err := util.CreateFile(filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", WGInterfaceName)), 0600)
+	f, err := util.CreateFile(filepath.Join(h.getWorkDir(), fmt.Sprintf("%s.conf", WGInterfaceName)), 0600)
 	if err != nil {
 		return err
 	}
@@ -47,14 +48,28 @@ func (h handler) WriteServerConfig(server model.ServerConfig, peers []model.Clie
 	return nil
 }
 
-func (h handler) WriteClientConfig(client model.ClientConfig, server model.ServerConfig) error {
-	// write client config in secret dir since client profile includes a private key
-	dir := h.getClientSecretDir()
-	err := util.Makedir(dir, 0700)
+func (h handler) SaveClientConfig(clientConfig model.ClientConfig) error {
+	if err := util.Makedir(h.getClientDir(), 0700); err != nil {
+		return err
+	}
+	f, err := util.CreateFile(filepath.Join(h.getClientDir(), fmt.Sprintf("%s.json", clientConfig.Name)), 0600)
 	if err != nil {
 		return err
 	}
-	f, err := util.CreateFile(filepath.Join(dir, fmt.Sprintf("%s.conf", client.Name)), 0600)
+	defer f.Close()
+
+	data, _ := json.MarshalIndent(clientConfig, "", "    ")
+	f.Write(data)
+	return nil
+}
+
+func (h handler) WriteClientConfig(client model.ClientConfig, server model.ServerConfig) error {
+	// write client config in secret dir since client profile includes a private key
+	err := util.Makedir(h.getClientSecretDir(), 0700)
+	if err != nil {
+		return err
+	}
+	f, err := util.CreateFile(filepath.Join(h.getClientSecretDir(), fmt.Sprintf("%s.conf", client.Name)), 0600)
 	if err != nil {
 		return err
 	}

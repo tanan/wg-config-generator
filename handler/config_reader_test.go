@@ -38,9 +38,9 @@ func Test_handler_readClient(t *testing.T) {
 
 	client1 := model.ClientConfig{
 		Name:         "client1",
-		Address:      "10.0.10.1",
-		PublicKey:    "PublicKey",
-		PresharedKey: "PresharedKey",
+		Address:      "10.10.10.10",
+		PublicKey:    "publickey",
+		PresharedKey: "presharedkey",
 	}
 
 	tests := []struct {

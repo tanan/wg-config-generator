@@ -1,9 +1,6 @@
 package handler
 
 import (
-	"io"
-	"log/slog"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/tanan/wg-config-generator/config"
@@ -19,6 +16,7 @@ const (
 type Handler interface {
 	GetClientList() ([]model.ClientConfig, error)
 	CreateClientConfig(name string, address string) (model.ClientConfig, error)
+	SaveClientConfig(client model.ClientConfig) error
 	CreateServerConfig() (model.ServerConfig, error)
 	WriteServerConfig(server model.ServerConfig, peers []model.ClientConfig) error
 	WriteClientConfig(client model.ClientConfig, server model.ServerConfig) error
@@ -37,30 +35,14 @@ func NewHandler(cmd Command, cfg config.Config) Handler {
 	}
 }
 
+func (h handler) getWorkDir() string {
+	return h.Config.WorkDir
+}
+
 func (h handler) getClientDir() string {
 	return filepath.Join(h.Config.WorkDir, ClientDir)
 }
 
 func (h handler) getClientSecretDir() string {
 	return filepath.Join(h.Config.WorkDir, ClientDir, SecretDir)
-}
-
-type Command interface {
-	ExecCommand(cmd *exec.Cmd, stdin io.Reader) (string, error)
-}
-
-type command struct{}
-
-func NewCommand() Command {
-	return &command{}
-}
-
-func (h command) ExecCommand(cmd *exec.Cmd, stdin io.Reader) (string, error) {
-	cmd.Stdin = stdin
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		slog.Error("failed to exec command", slog.String("command", cmd.String()))
-		return "", err
-	}
-	return string(out), err
 }

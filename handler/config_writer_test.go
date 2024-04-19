@@ -78,11 +78,48 @@ func Test_handler_WriteServerConfig(t *testing.T) {
 				t.Errorf("handler.WriteServerConfig() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			got, want, err := readFiles(filepath.Join(h.Config.WorkDir, fmt.Sprintf("%s.conf", WGInterfaceName)), filepath.Join("testdata", tt.wantFileName))
+			got, want, err := readFiles(filepath.Join(h.getWorkDir(), fmt.Sprintf("%s.conf", WGInterfaceName)), filepath.Join("testdata", tt.wantFileName))
 			if err != nil {
 				t.Fatalf("readFile() error : %v", err)
 			}
 
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func Test_handler_saveClientConfig(t *testing.T) {
+	clientConfig := model.ClientConfig{
+		Name:         "client1",
+		Address:      "10.10.10.10",
+		PrivateKey:   "privatekey",
+		PublicKey:    "publickey",
+		PresharedKey: "presharedkey",
+	}
+	tests := []struct {
+		name         string
+		clientConfig model.ClientConfig
+		wantErr      bool
+	}{
+		{name: "ok", clientConfig: clientConfig, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			h := handler{
+				Config: config.Config{
+					WorkDir: t.TempDir(),
+				},
+			}
+			if err := h.SaveClientConfig(tt.clientConfig); (err != nil) != tt.wantErr {
+				t.Errorf("handler.saveClientConfig() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			got, want, err := readFiles(filepath.Join(h.getClientDir(), fmt.Sprintf("%s.json", tt.clientConfig.Name)), filepath.Join("testdata", "clients", fmt.Sprintf("%s.json", tt.clientConfig.Name)))
+			if err != nil {
+				t.Fatalf("readFile() error : %v", err)
+			}
 			if diff := cmp.Diff(want, got); diff != "" {
 				t.Error(diff)
 			}

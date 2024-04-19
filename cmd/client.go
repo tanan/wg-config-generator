@@ -40,6 +40,11 @@ var createClientCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		if err := h.SaveClientConfig(clientConfig); err != nil {
+			slog.Error("failed to save client config", slog.String("error", err.Error()))
+			os.Exit(1)
+		}
+
 		serverConfig, err := h.CreateServerConfig()
 		if err != nil {
 			slog.Error("failed to create server config", slog.String("error", err.Error()))
