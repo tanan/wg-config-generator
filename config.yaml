@@ -5,7 +5,7 @@ server:
   port: 51820
   dns: 10.2.0.8
   mtu: 1420
-  privatekeyfile: ./app/wireguard/.serverkey
+  privatekeyfile: ./app/wireguard/.serverkey # do not write privatekey string itself
   publickey: publickey
   allowedips: 192.168.227.0/22
   postup: iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
