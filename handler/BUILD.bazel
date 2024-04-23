@@ -1,0 +1,36 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "handler",
+    srcs = [
+        "command.go",
+        "command_mock.go",
+        "config_generator.go",
+        "config_reader.go",
+        "config_writer.go",
+        "handler.go",
+    ],
+    importpath = "github.com/tanan/wg-config-generator/handler",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//config",
+        "//model",
+        "//util",
+    ],
+)
+
+go_test(
+    name = "handler_test",
+    srcs = [
+        "config_generator_test.go",
+        "config_reader_test.go",
+        "config_writer_test.go",
+    ],
+    data = glob(["testdata/**"]),
+    embed = [":handler"],
+    deps = [
+        "//config",
+        "//model",
+        "@com_github_google_go_cmp//cmp:go_default_library",
+    ],
+)

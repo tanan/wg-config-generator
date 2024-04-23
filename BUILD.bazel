@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "wg-config-generator_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/tanan/wg-config-generator",
+    visibility = ["//visibility:private"],
+    deps = ["//cmd"],
+)
+
+go_binary(
+    name = "wg-config-generator",
+    embed = [":wg-config-generator_lib"],
+    visibility = ["//visibility:public"],
+)

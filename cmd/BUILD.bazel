@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "cmd",
+    srcs = [
+        "client.go",
+        "root.go",
+        "server.go",
+    ],
+    importpath = "github.com/tanan/wg-config-generator/cmd",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//config",
+        "//handler",
+        "@com_github_spf13_cobra//:go_default_library",
+    ],
+)
