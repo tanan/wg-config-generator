@@ -1,29 +1,16 @@
 package handler
 
 import (
+	"bytes"
 	"fmt"
-	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/tanan/wg-config-generator/config"
 	"github.com/tanan/wg-config-generator/model"
 )
 
-func readFiles(gotFn string, wantFn string) (got string, want string, err error) {
-	g, err := os.ReadFile(gotFn)
-	if err != nil {
-		return "", "", err
-	}
-	w, err := os.ReadFile(wantFn)
-	if err != nil {
-		return "", "", err
-	}
-	return string(g), string(w), nil
-}
-
-func Test_handler_WriteServerConfig(t *testing.T) {
+func Test_handler_writeServerConfig(t *testing.T) {
 	server1 := model.ServerConfig{
 		Address:    "192.168.227.1",
 		ListenPort: 51820,
@@ -70,19 +57,24 @@ func Test_handler_WriteServerConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := handler{
-				Config: config.Config{WorkDir: t.TempDir()},
-			}
-
-			if err := h.WriteServerConfig(tt.args.server, tt.args.peers); (err != nil) != tt.wantErr {
-				t.Errorf("handler.WriteServerConfig() error = %v, wantErr %v", err, tt.wantErr)
-			}
-
-			got, want, err := readFiles(filepath.Join(h.getWorkDir(), fmt.Sprintf("%s.conf", WGInterfaceName)), filepath.Join("testdata", tt.wantFileName))
+			// prepare testdata
+			testFile := filepath.Join("testdata", tt.wantFileName)
+			want, err := readFile(testFile)
 			if err != nil {
-				t.Fatalf("readFile() error : %v", err)
+				t.Errorf("failed to prepare testdata: %s, error: %v", testFile, err)
+				return
 			}
 
+			// run test
+			h := handler{}
+			w := &bytes.Buffer{}
+			if err := h.writeServerConfig(w, tt.args.server, tt.args.peers); (err != nil) != tt.wantErr {
+				t.Errorf("handler.writeServerConfig() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			// compare
+			got := w.String()
 			if diff := cmp.Diff(want, got); diff != "" {
 				t.Error(diff)
 			}
@@ -90,44 +82,7 @@ func Test_handler_WriteServerConfig(t *testing.T) {
 	}
 }
 
-func Test_handler_saveClientConfig(t *testing.T) {
-	clientConfig := model.ClientConfig{
-		Name:         "client1",
-		Address:      "10.10.10.10",
-		PrivateKey:   "privatekey",
-		PublicKey:    "publickey",
-		PresharedKey: "presharedkey",
-	}
-	tests := []struct {
-		name         string
-		clientConfig model.ClientConfig
-		wantErr      bool
-	}{
-		{name: "ok", clientConfig: clientConfig, wantErr: false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			h := handler{
-				Config: config.Config{
-					WorkDir: t.TempDir(),
-				},
-			}
-			if err := h.SaveClientConfig(tt.clientConfig); (err != nil) != tt.wantErr {
-				t.Errorf("handler.saveClientConfig() error = %v, wantErr %v", err, tt.wantErr)
-			}
-
-			got, want, err := readFiles(filepath.Join(h.getClientDir(), fmt.Sprintf("%s.json", tt.clientConfig.Name)), filepath.Join("testdata", "clients", fmt.Sprintf("%s.json", tt.clientConfig.Name)))
-			if err != nil {
-				t.Fatalf("readFile() error : %v", err)
-			}
-			if diff := cmp.Diff(want, got); diff != "" {
-				t.Error(diff)
-			}
-		})
-	}
-}
-
-func Test_handler_WriteClientConfig(t *testing.T) {
+func Test_handler_writeClientConfig(t *testing.T) {
 	server := model.ServerConfig{
 		Endpoint:   "192.168.227.1:51820",
 		PublicKey:  "PublicKey",
@@ -149,7 +104,6 @@ func Test_handler_WriteClientConfig(t *testing.T) {
 		PrivateKey:   "PrivateKey2",
 		PresharedKey: "PresharedKey2",
 	}
-
 	type args struct {
 		client model.ClientConfig
 		server model.ServerConfig
@@ -164,16 +118,64 @@ func Test_handler_WriteClientConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := handler{
-				Config: config.Config{WorkDir: t.TempDir()},
-			}
-			if err := h.WriteClientConfig(tt.args.client, tt.args.server); (err != nil) != tt.wantErr {
-				t.Errorf("handler.WriteClientConfig() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			got, want, err := readFiles(filepath.Join(h.getClientSecretDir(), fmt.Sprintf("%s.conf", tt.args.client.Name)), filepath.Join("testdata", "clients", "secrets", fmt.Sprintf("%s.conf", tt.args.client.Name)))
+			// prepare testdata
+			testFile := filepath.Join("testdata", "clients", "secrets", fmt.Sprintf("%s.conf", tt.args.client.Name))
+			want, err := readFile(testFile)
 			if err != nil {
-				t.Fatalf("readFile() error : %v", err)
+				t.Errorf("failed to prepare testdata: %s, error: %v", testFile, err)
+				return
 			}
+
+			// run test
+			h := handler{}
+			w := &bytes.Buffer{}
+			if err := h.writeClientConfig(w, tt.args.client, tt.args.server); (err != nil) != tt.wantErr {
+				t.Errorf("handler.writeClientConfig() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			// compare
+			got := w.String()
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func Test_handler_saveClientConfig(t *testing.T) {
+	cc := model.ClientConfig{
+		Name:         "client1",
+		Address:      "10.10.10.10",
+		PrivateKey:   "privatekey",
+		PublicKey:    "publickey",
+		PresharedKey: "presharedkey",
+	}
+	tests := []struct {
+		name    string
+		cc      model.ClientConfig
+		wantErr bool
+	}{
+		{name: "ok", cc: cc, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// prepare testdata
+			testFile := filepath.Join("testdata", "clients", fmt.Sprintf("%s.json", tt.cc.Name))
+			want, err := readFile(testFile)
+			if err != nil {
+				t.Errorf("failed to prepare testdata: %s, error: %v", testFile, err)
+				return
+			}
+			h := handler{}
+			w := &bytes.Buffer{}
+			if err := h.saveClientConfig(w, tt.cc); (err != nil) != tt.wantErr {
+				t.Errorf("handler.saveClientConfig() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			// compare
+			got := w.String()
 			if diff := cmp.Diff(want, got); diff != "" {
 				t.Error(diff)
 			}
