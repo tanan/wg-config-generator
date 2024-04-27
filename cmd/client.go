@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tanan/wg-config-generator/config"
 	"github.com/tanan/wg-config-generator/handler"
+	"github.com/tanan/wg-config-generator/model"
 )
 
 // clientCmd represents the client command
@@ -29,6 +30,12 @@ var createClientCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// initialize config
 		initConfig(cmd)
+		t, _ := cmd.Flags().GetString("output-type")
+		if err := model.OutputType(t).Valid(); err != nil {
+			slog.Error("flag error", slog.String("error", err.Error()))
+			os.Exit(1)
+		}
+
 		h := handler.NewHandler(handler.NewCommand(), config.GetConfig())
 
 		name := args[0]
@@ -51,15 +58,14 @@ var createClientCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		outputType, _ := cmd.Flags().GetString("output-type")
 		var outputErr error
-		switch outputType {
-		case "text":
+		switch model.OutputType(t) {
+		case model.Text:
 			outputErr = h.WriteClientConfig(clientConfig, serverConfig)
-		case "email":
+		case model.Email:
 			outputErr = h.SendClientConfigByEmail(clientConfig, serverConfig)
 		default:
-			outputErr = fmt.Errorf("output type %s is not found", outputType)
+			outputErr = fmt.Errorf("output type %s is not found", t)
 		}
 		if outputErr != nil {
 			slog.Error("output error", slog.String("error", outputErr.Error()))
