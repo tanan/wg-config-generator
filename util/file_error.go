@@ -6,7 +6,7 @@ import (
 
 type FileError struct {
 	kind  FileErrorType
-	path  string
+	Path  string
 	inner error
 }
 
@@ -23,7 +23,7 @@ const (
 func NewFileError(kind FileErrorType, path string, err error) FileError {
 	return FileError{
 		kind:  kind,
-		path:  path,
+		Path:  path,
 		inner: err,
 	}
 }
@@ -34,7 +34,7 @@ func (err FileError) Is(target error) bool {
 }
 
 func (fe FileError) Error() string {
-	return fmt.Sprintf("File error. path: %s, err: %v", fe.path, fe.inner)
+	return fmt.Sprintf("File error. path: %s, err: %v", fe.Path, fe.inner)
 }
 
 func (fe FileError) Unwrap() error {

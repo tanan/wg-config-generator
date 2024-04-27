@@ -4,6 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/tanan/wg-config-generator/config"
 	"github.com/tanan/wg-config-generator/handler"
 	"github.com/tanan/wg-config-generator/model"
+	"github.com/tanan/wg-config-generator/util"
 )
 
 // clientCmd represents the client command
@@ -32,7 +34,7 @@ var createClientCmd = &cobra.Command{
 		initConfig(cmd)
 		t, _ := cmd.Flags().GetString("output-type")
 		if err := model.OutputType(t).Valid(); err != nil {
-			slog.Error("flag error", slog.String("error", err.Error()))
+			slog.Error("flag `output-type` error", slog.String("error", err.Error()))
 			os.Exit(1)
 		}
 
@@ -43,18 +45,36 @@ var createClientCmd = &cobra.Command{
 
 		clientConfig, err := h.CreateClientConfig(name, address)
 		if err != nil {
-			slog.Error("failed to create client config", slog.String("error", err.Error()))
+			var fileError util.FileError
+			var keyError util.KeyError
+			if errors.As(err, &keyError) {
+				slog.Error("KeyError when func handler.CreateClientConfig()", slog.String("error", err.Error()))
+			} else if errors.As(err, &fileError) {
+				slog.Error("FileError when func handler.CreateClientConfig()", slog.String("path", fileError.Path))
+			} else {
+				slog.Error("Error when func handler.CreateClientConfig()", slog.String("error", err.Error()))
+			}
 			os.Exit(1)
 		}
 
 		if err := h.SaveClientSetting(clientConfig); err != nil {
-			slog.Error("failed to save client config", slog.String("error", err.Error()))
+			var fileError util.FileError
+			if errors.As(err, &fileError) {
+				slog.Error("FileError when func handler.SaveClientSetting()", slog.String("path", fileError.Path))
+			} else {
+				slog.Error("Error when func handler.SaveClientSetting()", slog.String("error", err.Error()))
+			}
 			os.Exit(1)
 		}
 
 		serverConfig, err := h.CreateServerConfig()
 		if err != nil {
-			slog.Error("failed to create server config", slog.String("error", err.Error()))
+			var fileError util.FileError
+			if errors.As(err, &fileError) {
+				slog.Error("FileError when func handler.CreateServerConfig()", slog.String("path", fileError.Path))
+			} else {
+				slog.Error("Error when func handler.CreateServerConfig()", slog.String("error", err.Error()))
+			}
 			os.Exit(1)
 		}
 
@@ -65,7 +85,7 @@ var createClientCmd = &cobra.Command{
 		case model.Email:
 			outputErr = h.SendClientConfigByEmail(clientConfig, serverConfig)
 		default:
-			outputErr = fmt.Errorf("output type %s is not found", t)
+			slog.Info("this output type is not implemented yet", slog.String("type", t))
 		}
 		if outputErr != nil {
 			slog.Error("output error", slog.String("error", outputErr.Error()))
