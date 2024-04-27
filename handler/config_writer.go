@@ -65,6 +65,7 @@ func (h handler) WriteClientConfig(client model.ClientConfig, server model.Serve
 }
 
 func (h handler) writeServerConfig(w io.Writer, server model.ServerConfig, peers []model.ClientConfig) error {
+	ew := util.NewErrorWriter(w)
 	var row []string
 	row = append(row, "[Interface]")
 	row = append(row, fmt.Sprintf("Address = %s", server.Address))
@@ -73,33 +74,40 @@ func (h handler) writeServerConfig(w io.Writer, server model.ServerConfig, peers
 	row = append(row, fmt.Sprintf("MTU = %s", strconv.Itoa(server.MTU)))
 	row = append(row, fmt.Sprintf("PostUp = %s", server.PostUp))
 	row = append(row, fmt.Sprintf("PostDown = %s", server.PostDown))
-	w.Write([]byte(strings.Join(row, "\n")))
-
-	w.Write([]byte("\n"))
+	ew.Write([]byte(strings.Join(row, "\n")))
+	ew.Write([]byte("\n"))
 
 	for _, peer := range peers {
 		var row []string
-		w.Write([]byte("\n"))
+		ew.Write([]byte("\n"))
 		row = append(row, fmt.Sprintf("# %s", peer.Name))
 		row = append(row, "[Peer]")
 		row = append(row, fmt.Sprintf("PublicKey = %s", peer.PublicKey))
 		row = append(row, fmt.Sprintf("PresharedKey = %s", peer.PresharedKey))
 		row = append(row, fmt.Sprintf("AllowedIPs = %s/32", peer.Address))
-		w.Write([]byte(strings.Join(row, "\n")))
-		w.Write([]byte("\n"))
+		ew.Write([]byte(strings.Join(row, "\n")))
+		ew.Write([]byte("\n"))
 	}
+
+	if ew.Err != nil {
+		return util.ErrFileWriteFailure
+	}
+
 	return nil
 }
 
 func (h handler) saveClientConfig(w io.Writer, cc model.ClientConfig) error {
+	ew := util.NewErrorWriter(w)
 	data, _ := json.MarshalIndent(cc, "", "    ")
-	if _, err := w.Write(data); err != nil {
-		return err
+	ew.Write(data)
+	if ew.Err != nil {
+		return util.ErrFileWriteFailure
 	}
 	return nil
 }
 
 func (h handler) writeClientConfig(w io.Writer, client model.ClientConfig, server model.ServerConfig) error {
+	ew := util.NewErrorWriter(w)
 	var row []string
 	row = append(row, "[Interface]")
 	row = append(row, fmt.Sprintf("Address = %s", client.Address))
@@ -113,8 +121,11 @@ func (h handler) writeClientConfig(w io.Writer, client model.ClientConfig, serve
 	row = append(row, fmt.Sprintf("AllowedIPs = %s", server.AllowedIPs))
 	row = append(row, fmt.Sprintf("Endpoint = %s", server.Endpoint))
 
-	w.Write([]byte(strings.Join(row, "\n")))
-	w.Write([]byte("\n"))
+	ew.Write([]byte(strings.Join(row, "\n")))
+	ew.Write([]byte("\n"))
+	if ew.Err != nil {
+		return util.ErrFileWriteFailure
+	}
 	return nil
 }
 
