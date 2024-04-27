@@ -16,7 +16,7 @@ const (
 type Handler interface {
 	GetClientList() ([]model.ClientConfig, error)
 	CreateClientConfig(name string, address string) (model.ClientConfig, error)
-	SaveClientConfig(client model.ClientConfig) error
+	SaveClientSetting(client model.ClientConfig) error
 	CreateServerConfig() (model.ServerConfig, error)
 	WriteServerConfig(server model.ServerConfig, peers []model.ClientConfig) error
 	WriteClientConfig(client model.ClientConfig, server model.ServerConfig) error

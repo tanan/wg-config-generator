@@ -143,7 +143,7 @@ func Test_handler_writeClientConfig(t *testing.T) {
 	}
 }
 
-func Test_handler_saveClientConfig(t *testing.T) {
+func Test_handler_saveClientSetting(t *testing.T) {
 	cc := model.ClientConfig{
 		Name:         "client1",
 		Address:      "10.10.10.10",
@@ -169,8 +169,8 @@ func Test_handler_saveClientConfig(t *testing.T) {
 			}
 			h := handler{}
 			w := &bytes.Buffer{}
-			if err := h.saveClientConfig(w, tt.cc); (err != nil) != tt.wantErr {
-				t.Errorf("handler.saveClientConfig() error = %v, wantErr %v", err, tt.wantErr)
+			if err := h.saveClientSetting(w, tt.cc); (err != nil) != tt.wantErr {
+				t.Errorf("handler.saveClientSetting() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 

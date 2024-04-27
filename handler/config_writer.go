@@ -13,54 +13,60 @@ import (
 )
 
 func (h handler) WriteServerConfig(server model.ServerConfig, peers []model.ClientConfig) error {
-	err := util.Makedir(h.getWorkDir(), 0700)
+	workDir := h.getWorkDir()
+	err := util.Makedir(workDir, 0700)
 	if err != nil {
-		return err
+		return util.NewFileError(util.PermissionDenied, workDir, err)
 	}
-	f, err := util.CreateFile(filepath.Join(h.getWorkDir(), fmt.Sprintf("%s.conf", WGInterfaceName)), 0600)
+	confPath := filepath.Join(workDir, fmt.Sprintf("%s.conf", WGInterfaceName))
+	f, err := util.CreateFile(confPath, 0600)
 	if err != nil {
-		return err
+		return util.NewFileError(util.PermissionDenied, confPath, err)
 	}
 
 	if err := h.writeServerConfig(f, server, peers); err != nil {
-		return err
+		return util.NewFileError(util.FileWriteFailure, confPath, err)
 	}
 
-	return nil
-}
-
-func (h handler) SaveClientConfig(cc model.ClientConfig) error {
-	if err := util.Makedir(h.getClientDir(), 0700); err != nil {
-		return err
-	}
-	f, err := util.CreateFile(filepath.Join(h.getClientDir(), fmt.Sprintf("%s.json", cc.Name)), 0600)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	if err := h.saveClientConfig(f, cc); err != nil {
-		return err
-	}
 	return nil
 }
 
 func (h handler) WriteClientConfig(client model.ClientConfig, server model.ServerConfig) error {
 	// write client config in secret dir since client profile includes a private key
-	err := util.Makedir(h.getClientSecretDir(), 0700)
+	secretDir := h.getClientSecretDir()
+	err := util.Makedir(secretDir, 0700)
 	if err != nil {
-		return err
+		return util.NewFileError(util.PermissionDenied, secretDir, err)
 	}
-	f, err := util.CreateFile(filepath.Join(h.getClientSecretDir(), fmt.Sprintf("%s.conf", client.Name)), 0600)
+	confPath := filepath.Join(secretDir, fmt.Sprintf("%s.conf", client.Name))
+	f, err := util.CreateFile(confPath, 0600)
 	if err != nil {
-		return err
+		return util.NewFileError(util.PermissionDenied, confPath, err)
 	}
 	defer f.Close()
 
 	if err := h.writeClientConfig(f, client, server); err != nil {
-		return err
+		return util.NewFileError(util.FileWriteFailure, confPath, err)
 	}
 
+	return nil
+}
+
+func (h handler) SaveClientSetting(cc model.ClientConfig) error {
+	workDir := h.getWorkDir()
+	if err := util.Makedir(workDir, 0700); err != nil {
+		return util.NewFileError(util.PermissionDenied, workDir, err)
+	}
+	confPath := filepath.Join(workDir, fmt.Sprintf("%s.json", cc.Name))
+	f, err := util.CreateFile(confPath, 0600)
+	if err != nil {
+		return util.NewFileError(util.PermissionDenied, confPath, err)
+	}
+	defer f.Close()
+
+	if err := h.saveClientSetting(f, cc); err != nil {
+		return util.NewFileError(util.FileWriteFailure, confPath, err)
+	}
 	return nil
 }
 
@@ -90,18 +96,18 @@ func (h handler) writeServerConfig(w io.Writer, server model.ServerConfig, peers
 	}
 
 	if ew.Err != nil {
-		return util.ErrFileWriteFailure
+		return ew.Err
 	}
 
 	return nil
 }
 
-func (h handler) saveClientConfig(w io.Writer, cc model.ClientConfig) error {
+func (h handler) saveClientSetting(w io.Writer, cc model.ClientConfig) error {
 	ew := util.NewErrorWriter(w)
 	data, _ := json.MarshalIndent(cc, "", "    ")
 	ew.Write(data)
 	if ew.Err != nil {
-		return util.ErrFileWriteFailure
+		return ew.Err
 	}
 	return nil
 }
@@ -124,7 +130,7 @@ func (h handler) writeClientConfig(w io.Writer, client model.ClientConfig, serve
 	ew.Write([]byte(strings.Join(row, "\n")))
 	ew.Write([]byte("\n"))
 	if ew.Err != nil {
-		return util.ErrFileWriteFailure
+		return ew.Err
 	}
 	return nil
 }
