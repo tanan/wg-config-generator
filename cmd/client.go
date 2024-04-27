@@ -50,7 +50,7 @@ var createClientCmd = &cobra.Command{
 			if errors.As(err, &keyError) {
 				slog.Error("KeyError when func handler.CreateClientConfig()", slog.String("error", err.Error()))
 			} else if errors.As(err, &fileError) {
-				slog.Error("FileError when func handler.CreateClientConfig()", slog.String("path", fileError.Path))
+				slog.Error("FileError when func handler.CreateClientConfig()", slog.String("path", fileError.Path), slog.String("error", err.Error()))
 			} else {
 				slog.Error("Error when func handler.CreateClientConfig()", slog.String("error", err.Error()))
 			}
@@ -60,7 +60,7 @@ var createClientCmd = &cobra.Command{
 		if err := h.SaveClientSetting(clientConfig); err != nil {
 			var fileError util.FileError
 			if errors.As(err, &fileError) {
-				slog.Error("FileError when func handler.SaveClientSetting()", slog.String("path", fileError.Path))
+				slog.Error("FileError when func handler.SaveClientSetting()", slog.String("path", fileError.Path), slog.String("error", err.Error()))
 			} else {
 				slog.Error("Error when func handler.SaveClientSetting()", slog.String("error", err.Error()))
 			}
@@ -71,7 +71,7 @@ var createClientCmd = &cobra.Command{
 		if err != nil {
 			var fileError util.FileError
 			if errors.As(err, &fileError) {
-				slog.Error("FileError when func handler.CreateServerConfig()", slog.String("path", fileError.Path))
+				slog.Error("FileError when func handler.CreateServerConfig()", slog.String("path", fileError.Path), slog.String("error", err.Error()))
 			} else {
 				slog.Error("Error when func handler.CreateServerConfig()", slog.String("error", err.Error()))
 			}
